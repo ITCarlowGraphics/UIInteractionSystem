@@ -15,7 +15,12 @@ public class TestScript : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            UIInteractionSystem.Instance.ShowDialog("Pick two players to swap", "Okay", UIInteractionSystem.Instance.ButtonClicked, "How Are You", UIInteractionSystem.Instance.ButtonClicked);
+            UIInteractionSystem.Instance.ShowDialog("Pick two players to swap", "Okay", ButtonClicked, "How Are You", ButtonClicked);
         }
+    }
+
+    public void ButtonClicked()
+    {
+        Debug.Log("Button Clicked!");
     }
 }

@@ -9,8 +9,6 @@ using UnityEngine.UI;
 
 public class UIInteractionSystem : MonoBehaviour
 {
-    // instance attributes
-    public static UIInteractionSystem Instance;
     // gameobject attributes
     public Canvas canvas;
     // funtion attributes
@@ -21,73 +19,36 @@ public class UIInteractionSystem : MonoBehaviour
     // public bool createButtonOrNot;
     // public int buttonNumbers;
 
-    private void Awake()
+    // instance attributes
+    public static UIInteractionSystem _instance;
+
+    public static UIInteractionSystem Instance
     {
-        if (Instance != null && Instance != this)
+        get
         {
-            Destroy(this);
-        }
-        else
-        {
-            Instance = this;
-        }
-    }
+            if (_instance == null)
+            {
+                // Check if an existing GameManager is present in the scene
+                _instance = FindObjectOfType<UIInteractionSystem>();
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        canvas = FindAnyObjectByType<Canvas>();
-        if (null == canvas)
-        {
-            Debug.LogError("No Canvas found in the scene. Please add a Canvas in order to use UI elements.");
-            return;
-        }
-    }
+                if (_instance == null)
+                {
+                    // No existing GameManager found, so create a new GameObject and add this script
+                    GameObject em = new GameObject("UIInteractionSystem");
+                    _instance = em.AddComponent<UIInteractionSystem>();
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    /*
-    public void CreateButtons()
-    {
-        for (int i = 0; i < buttonNumbers; i++)
-        {
-            GameObject buttonObj = new("MyButton");
-            buttonObj.transform.SetParent(canvas.transform, false);
-            RectTransform rectTransform = buttonObj.AddComponent<RectTransform>();
-            rectTransform.sizeDelta = new Vector2(160, 30);
-            rectTransform.anchoredPosition = new Vector3(0, i * 50);
-
-            Button button = buttonObj.AddComponent<Button>();
-            Image image = buttonObj.AddComponent<Image>();
-
-            GameObject textObj = new("ButtonText");
-            textObj.transform.SetParent(buttonObj.transform, false);
-
-            // button init
-            button.targetGraphic = image;
-            // text init
-            Text text = textObj.AddComponent<Text>();
-            text.text = "Click Me!";
-            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            text.color = Color.black;
-            text.alignment = TextAnchor.MiddleCenter;
-
-            // image.sprite = Resources.Load<Sprite>("Resources/unity_builtin_extra/Background");
-
-            RectTransform textRectTransform = textObj.GetComponent<RectTransform>();
-            textRectTransform.sizeDelta = new Vector2(160, 30);
-            button.onClick.AddListener(() => ButtonClicked());
+                    // Optionally, make this object persistent
+                    DontDestroyOnLoad(em);
+                }
+            }
+            return _instance;
         }
     }
-    */
 
     // trigger one button only
     public void ShowDialog(string dialogText, string buttonText, TestDelegate buttonFunction)
     {
+        canvas = FindObjectOfType<Canvas>();
         SetFunction1(buttonFunction);
         // dialog box init
         GameObject dialogBoxPrefab = AssetDatabase.LoadAssetAtPath("Assets/Prefabs/DialogBox.prefab", typeof(GameObject)) as GameObject;
@@ -105,6 +66,7 @@ public class UIInteractionSystem : MonoBehaviour
 
     public void ShowDialog(string dialogText, string buttonText_1, TestDelegate buttonFunction_1, string buttonText_2, TestDelegate buttonFunction_2)
     {
+        canvas = FindObjectOfType<Canvas>();
         SetFunction1(buttonFunction_1);
         SetFunction2(buttonFunction_2);
         // dialog box init
@@ -135,6 +97,7 @@ public class UIInteractionSystem : MonoBehaviour
         function2 = t_function;
     }
 
+    // test function
     public void ButtonClicked()
     {
         Debug.Log("Button Clicked!");
