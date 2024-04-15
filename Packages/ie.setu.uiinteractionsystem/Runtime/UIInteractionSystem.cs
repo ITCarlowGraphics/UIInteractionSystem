@@ -15,6 +15,9 @@ public class UIInteractionSystem : MonoBehaviour
     public delegate void TestDelegate();
     public TestDelegate function1;
     public TestDelegate function2;
+    // Setting attributes
+    public int questionTimeLimit;
+    public float soundVolumeCoefficient;
     // button attributes
     // public bool createButtonOrNot;
     // public int buttonNumbers;
@@ -86,6 +89,8 @@ public class UIInteractionSystem : MonoBehaviour
         button_2.onClick.AddListener(() => function2());
 
     }
+
+
 
     public void SetFunction1(TestDelegate t_function)
     {
