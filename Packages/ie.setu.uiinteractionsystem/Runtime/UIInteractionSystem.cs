@@ -2,15 +2,18 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+
+// [CreateAssetMenu(fileName = "DialogBox")]
 
 public class UIInteractionSystem : MonoBehaviour
 {
     // gameobject attributes
     public Canvas canvas;
+    public GameObject dialogBoxPrefab;
     // funtion attributes
     public delegate void TestDelegate();
     public TestDelegate function1;
@@ -48,13 +51,31 @@ public class UIInteractionSystem : MonoBehaviour
         }
     }
 
+    public void InstantiatePrefab(string addressableKey)
+    {
+        Addressables.InstantiateAsync(addressableKey).Completed += OnPrefabInstantiated;
+    }
+
+    private void OnPrefabInstantiated(AsyncOperationHandle<GameObject> obj)
+    {
+        if (obj.Status == AsyncOperationStatus.Succeeded)
+        {
+            dialogBoxPrefab = obj.Result;
+        }
+        else
+        {
+            Debug.LogError("Failed to load the prefab.");
+        }
+    }
+
     // trigger one button only
-    public void ShowDialog(string dialogText, string buttonText, TestDelegate buttonFunction)
+    public IEnumerator ShowDialog(string dialogText, string buttonText, TestDelegate buttonFunction)
     {
         canvas = FindObjectOfType<Canvas>();
         SetFunction1(buttonFunction);
         // dialog box init
-        GameObject dialogBoxPrefab = AssetDatabase.LoadAssetAtPath("Assets/Prefabs/DialogBox.prefab", typeof(GameObject)) as GameObject;
+        InstantiatePrefab("Packages/ie.setu.uiinteractionsystem/Runtime/DialogBox.prefab");
+        yield return new WaitUntil(() => dialogBoxPrefab != null);
         GameObject dialogBox = Instantiate(dialogBoxPrefab);
         dialogBox.transform.SetParent(canvas.transform, false);
         dialogBox.transform.Find("One_Button").gameObject.SetActive(true);
@@ -67,13 +88,14 @@ public class UIInteractionSystem : MonoBehaviour
         button.onClick.AddListener(() => function1());
     }
 
-    public void ShowDialog(string dialogText, string buttonText_1, TestDelegate buttonFunction_1, string buttonText_2, TestDelegate buttonFunction_2)
+    public IEnumerator ShowDialogTwoButton(string dialogText, string buttonText_1, TestDelegate buttonFunction_1, string buttonText_2, TestDelegate buttonFunction_2)
     {
         canvas = FindObjectOfType<Canvas>();
         SetFunction1(buttonFunction_1);
         SetFunction2(buttonFunction_2);
         // dialog box init
-        GameObject dialogBoxPrefab = AssetDatabase.LoadAssetAtPath("Assets/Prefabs/DialogBox.prefab", typeof(GameObject)) as GameObject;
+        InstantiatePrefab("Packages/ie.setu.uiinteractionsystem/Runtime/DialogBox.prefab");
+        yield return new WaitUntil(() => dialogBoxPrefab != null);
         GameObject dialogBox = Instantiate(dialogBoxPrefab);
         dialogBox.transform.SetParent(canvas.transform, false);
         dialogBox.transform.Find("Two_Button").gameObject.SetActive(true);

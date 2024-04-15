@@ -3,7 +3,9 @@ guid: 4de3956e6ae035c49b8bda18c8abc727
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - canvas: {instanceID: 0}
+  - dialogBoxPrefab: {fileID: 8075286928445764550, guid: 5c6f4a098d4437444bf6e2a2c6e287fe, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
