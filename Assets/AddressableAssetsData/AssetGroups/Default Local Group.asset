@@ -22,6 +22,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6d322224d23ece1479b0d42d51a7b416
+    m_Address: Packages/ie.setu.uiinteractionsystem/Runtime/SettingMenu.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: fc7a8b081c517d44f8973599d7e5bdb4, type: 2}
   m_SchemaSet:

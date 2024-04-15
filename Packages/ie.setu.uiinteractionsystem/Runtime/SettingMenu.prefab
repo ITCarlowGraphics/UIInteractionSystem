@@ -329,7 +329,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1428917323025311976}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8075286928445764550}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &6517175885835177854
 GameObject:
   m_ObjectHideFlags: 0
@@ -477,7 +489,7 @@ GameObject:
   - component: {fileID: 7038676588709977915}
   m_Layer: 5
   m_Name: SettingMenu
-  m_TagString: Untagged
+  m_TagString: SettingMenu
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

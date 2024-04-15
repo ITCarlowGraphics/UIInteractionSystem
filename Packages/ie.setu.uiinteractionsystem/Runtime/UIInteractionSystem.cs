@@ -14,6 +14,7 @@ public class UIInteractionSystem : MonoBehaviour
     // gameobject attributes
     public Canvas canvas;
     public GameObject dialogBoxPrefab;
+    public GameObject settingMenuPrefab;
     // funtion attributes
     public delegate void TestDelegate();
     public TestDelegate function1;
@@ -68,6 +69,23 @@ public class UIInteractionSystem : MonoBehaviour
         }
     }
 
+    public void InstantiateSettingMenuPrefab(string addressableKey)
+    {
+        Addressables.InstantiateAsync(addressableKey).Completed += OnSettingMenuInstantiated;
+    }
+
+    private void OnSettingMenuInstantiated(AsyncOperationHandle<GameObject> obj)
+    {
+        if (obj.Status == AsyncOperationStatus.Succeeded)
+        {
+            settingMenuPrefab = obj.Result;
+        }
+        else
+        {
+            Debug.LogError("Failed to load the setting menu prefab.");
+        }
+    }
+
     // trigger one button only
     public IEnumerator ShowDialog(string dialogText, string buttonText, TestDelegate buttonFunction)
     {
@@ -112,7 +130,22 @@ public class UIInteractionSystem : MonoBehaviour
 
     }
 
-
+    public IEnumerator ShowSettingMenu()
+    {
+        canvas = FindObjectOfType<Canvas>();
+        if (GameObject.FindGameObjectWithTag("SettingMenu") != null)
+        {
+            GameObject.FindGameObjectWithTag("SettingMenu").SetActive(true);
+            yield return null;
+        }
+        else
+        {
+            // setting menu init
+            InstantiateSettingMenuPrefab("Packages/ie.setu.uiinteractionsystem/Runtime/SettingMenu.prefab");
+            yield return new WaitUntil(() => settingMenuPrefab != null);
+            GameObject.FindGameObjectWithTag("SettingMenu").transform.SetParent(canvas.transform, false);
+        }
+    }
 
     public void SetFunction1(TestDelegate t_function)
     {
