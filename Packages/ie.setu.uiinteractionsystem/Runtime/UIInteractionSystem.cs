@@ -20,8 +20,8 @@ public class UIInteractionSystem : MonoBehaviour
     public TestDelegate function1;
     public TestDelegate function2;
     // Setting attributes
-    public int questionTimeLimit;
-    public float soundVolumeCoefficient;
+    public int questionTimeLimit = 20;
+    public float soundVolumeCoefficient = 100.0f;
     // button attributes
     // public bool createButtonOrNot;
     // public int buttonNumbers;
