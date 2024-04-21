@@ -16,7 +16,8 @@ public class TestScript : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             // StartCoroutine(UIInteractionSystem.Instance.ShowDialogTwoButton("Pick two players to swap", "One Player", ButtonClicked, "Two Players", ButtonClicked));
-            StartCoroutine(UIInteractionSystem.Instance.ShowSettingMenu());
+            // StartCoroutine(UIInteractionSystem.Instance.ShowSettingMenu());
+            UIInteractionSystem.Instance.CreateButtons("Click Me!", ButtonClicked);
         }
     }
 

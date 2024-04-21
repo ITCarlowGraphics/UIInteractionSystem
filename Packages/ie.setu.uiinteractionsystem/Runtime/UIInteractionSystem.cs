@@ -19,12 +19,13 @@ public class UIInteractionSystem : MonoBehaviour
     public delegate void TestDelegate();
     public TestDelegate function1;
     public TestDelegate function2;
+    public TestDelegate scriptButtonFunction;
     // Setting attributes
     public int questionTimeLimit = 20;
     public float soundVolumeCoefficient = 100.0f;
-    // button attributes
-    // public bool createButtonOrNot;
-    // public int buttonNumbers;
+    // script button attributes
+    public bool createButtonOrNot;
+    public int buttonNumbers;
 
     // instance attributes
     public static UIInteractionSystem _instance;
@@ -41,7 +42,7 @@ public class UIInteractionSystem : MonoBehaviour
                 if (_instance == null)
                 {
                     // No existing GameManager found, so create a new GameObject and add this script
-                    GameObject em = new GameObject("UIInteractionSystem");
+                    GameObject em = new("UIInteractionSystem");
                     _instance = em.AddComponent<UIInteractionSystem>();
 
                     // Optionally, make this object persistent
@@ -147,6 +148,38 @@ public class UIInteractionSystem : MonoBehaviour
         }
     }
 
+    public void CreateButtons(string buttonText, TestDelegate buttonFunction)
+    {
+        canvas = FindObjectOfType<Canvas>();
+        SetScriptButtonFunction(buttonFunction);
+
+        GameObject buttonObj = new("MyButton");
+        buttonObj.transform.SetParent(this.transform, false);
+        RectTransform rectTransform = buttonObj.AddComponent<RectTransform>();
+        rectTransform.sizeDelta = new Vector2(160, 30);
+        rectTransform.anchoredPosition = new Vector3(0, 0);
+
+        Button button = buttonObj.AddComponent<Button>();
+        Image image = buttonObj.AddComponent<Image>();
+
+        buttonObj.transform.SetParent(canvas.transform, false);
+        GameObject textObj = new("ButtonText");
+        textObj.transform.SetParent(buttonObj.transform, false);
+
+        // button init
+        button.targetGraphic = image;
+        // text init
+        Text text = textObj.AddComponent<Text>();
+        text.text = buttonText;
+        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        text.color = Color.black;
+        text.alignment = TextAnchor.MiddleCenter;
+
+        RectTransform textRectTransform = textObj.GetComponent<RectTransform>();
+        textRectTransform.sizeDelta = new Vector2(160, 30);
+        button.onClick.AddListener(() => scriptButtonFunction());
+    }
+
     public void SetFunction1(TestDelegate t_function)
     {
         function1 = t_function;
@@ -157,9 +190,8 @@ public class UIInteractionSystem : MonoBehaviour
         function2 = t_function;
     }
 
-    // test function
-    public void ButtonClicked()
+    public void SetScriptButtonFunction(TestDelegate t_function)
     {
-        Debug.Log("Button Clicked!");
+        scriptButtonFunction = t_function;
     }
 }
