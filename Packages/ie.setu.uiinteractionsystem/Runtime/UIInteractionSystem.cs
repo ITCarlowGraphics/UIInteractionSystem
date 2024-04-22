@@ -13,8 +13,8 @@ public class UIInteractionSystem : MonoBehaviour
 {
     // gameobject attributes
     public Canvas canvas;
-    public GameObject dialogBoxPrefab;
-    public GameObject settingMenuPrefab;
+    // public GameObject dialogBoxPrefab;
+    // public GameObject settingMenuPrefab;
     // funtion attributes
     public delegate void TestDelegate();
     public TestDelegate function1;
@@ -53,6 +53,7 @@ public class UIInteractionSystem : MonoBehaviour
         }
     }
 
+    /*
     public void InstantiatePrefab(string addressableKey)
     {
         Addressables.InstantiateAsync(addressableKey).Completed += OnPrefabInstantiated;
@@ -147,37 +148,135 @@ public class UIInteractionSystem : MonoBehaviour
             GameObject.FindGameObjectWithTag("SettingMenu").transform.SetParent(canvas.transform, false);
         }
     }
+    */
 
-    public void CreateButtons(string buttonText, TestDelegate buttonFunction)
+    //-----------------------------------------------------------------------------------------------------------------//
+    // Script Dialog Box
+    //-----------------------------------------------------------------------------------------------------------------//
+
+    public void CreatePanel(Canvas _canvas, string _dialogText, Font _dialogTextFont, int _dialogTextSize, string _dialogTextColor, string _frontPanelColor, string _backPanelColor, Vector2 _panelSize)
     {
-        canvas = FindObjectOfType<Canvas>();
-        SetScriptButtonFunction(buttonFunction);
+        // Color attributes init
+        Color dialogTextColor = new(0, 0, 0);
+        Color frontPanelColor = new(0, 0, 0);
+        Color backPanelColor = new(0, 0, 0);
+        if (!_dialogTextColor.Contains("#"))
+        {
+            _dialogTextColor = _dialogTextColor.Insert(0, "#");
+        }
+        if (!_frontPanelColor.Contains("#"))
+        {
+            _frontPanelColor = _frontPanelColor.Insert(0, "#");
+        }
+        if (!_backPanelColor.Contains("#"))
+        {
+            _backPanelColor = _backPanelColor.Insert(0, "#");
+        }
+        // setParent init
+        if (GameObject.Find("DialogBox") == null)
+        {
+            GameObject dialogBox = new("DialogBox");
+            dialogBox.transform.SetParent(_canvas.transform, false);
+        }
+        // color parsement
+        if (ColorUtility.TryParseHtmlString(_dialogTextColor, out Color _color1))
+        {
+            dialogTextColor = _color1;
+        }
+        if (ColorUtility.TryParseHtmlString(_frontPanelColor, out Color _color2))
+        {
+            frontPanelColor = _color2;
+        }
+        if (ColorUtility.TryParseHtmlString(_backPanelColor, out Color _color3))
+        {
+            backPanelColor = _color3;
+        }
 
-        GameObject buttonObj = new("MyButton");
-        buttonObj.transform.SetParent(this.transform, false);
+        // panels init
+        GameObject panelObj_1 = new("Back_Panel");
+        GameObject panelObj_2 = new("Front_Panel");
+        panelObj_1.transform.SetParent(GameObject.Find("DialogBox").transform, false);
+        panelObj_2.transform.SetParent(GameObject.Find("DialogBox").transform, false);
+        // panels rect init
+        RectTransform rectTransform_1 = panelObj_1.AddComponent<RectTransform>();
+        RectTransform rectTransform_2 = panelObj_2.AddComponent<RectTransform>();
+        rectTransform_1.sizeDelta = _panelSize;
+        rectTransform_2.sizeDelta = _panelSize - new Vector2(25.0f, 25.0f);
+        rectTransform_1.anchoredPosition = new Vector2(0, 0);
+        rectTransform_2.anchoredPosition = new Vector2(0, 0);
+        // panels color init
+        Image image_1 = panelObj_1.AddComponent<Image>();
+        Image image_2 = panelObj_2.AddComponent<Image>();
+        image_1.color = backPanelColor; 
+        image_2.color = frontPanelColor;
+        // text init
+        GameObject textObj = new("DialogText");
+        textObj.transform.SetParent(GameObject.Find("DialogBox").transform, false);
+        Text text = textObj.AddComponent<Text>();
+        text.text = _dialogText;
+        text.fontSize = _dialogTextSize;
+        text.font = _dialogTextFont;
+        text.color = dialogTextColor;
+        text.alignment = TextAnchor.UpperCenter;
+        RectTransform textRectTransform = textObj.GetComponent<RectTransform>();
+        textRectTransform.sizeDelta = _panelSize - new Vector2(50.0f, 50.0f);
+    }
+
+    public void CreateButton(Canvas _canvas, string _buttonText, Font _buttonTextFont, int _buttonTextSize, string _buttonTextColor, string _buttonColor, Vector2 _buttonSize, Vector2 _buttonAnchoredPosition, TestDelegate _buttonFunction)
+    {
+        // Color attributes init
+        Color buttonTextColor = new(0, 0, 0);
+        Color buttonColor = new(0, 0, 0);
+        if (!_buttonTextColor.Contains("#"))
+        {
+            _buttonTextColor = _buttonTextColor.Insert(0, "#");
+        }
+        if (!_buttonColor.Contains("#"))
+        {
+            _buttonColor = _buttonColor.Insert(0, "#");
+        }
+        // setParent init
+        if (GameObject.Find("DialogBox") == null)
+        {
+            GameObject dialogBox = new("DialogBox");
+            dialogBox.transform.SetParent(_canvas.transform, false);
+        }
+        // color parsement
+        if (ColorUtility.TryParseHtmlString(_buttonTextColor, out Color _color1))
+        {
+            buttonTextColor = _color1;
+        }
+        if (ColorUtility.TryParseHtmlString(_buttonColor, out Color _color2))
+        {
+            buttonColor = _color2;
+        }
+
+        GameObject buttonObj = new("Button");
+        buttonObj.transform.SetParent(GameObject.Find("DialogBox").transform, false);
         RectTransform rectTransform = buttonObj.AddComponent<RectTransform>();
-        rectTransform.sizeDelta = new Vector2(160, 30);
-        rectTransform.anchoredPosition = new Vector3(0, 0);
+        rectTransform.sizeDelta = _buttonSize;
+        rectTransform.anchoredPosition = _buttonAnchoredPosition;
 
         Button button = buttonObj.AddComponent<Button>();
         Image image = buttonObj.AddComponent<Image>();
 
-        buttonObj.transform.SetParent(canvas.transform, false);
         GameObject textObj = new("ButtonText");
         textObj.transform.SetParent(buttonObj.transform, false);
 
         // button init
         button.targetGraphic = image;
+        button.image.color = buttonColor;
         // text init
         Text text = textObj.AddComponent<Text>();
-        text.text = buttonText;
-        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        text.color = Color.black;
+        text.text = _buttonText;
+        text.fontSize = _buttonTextSize;
+        text.font = _buttonTextFont;
+        text.color = buttonTextColor;
         text.alignment = TextAnchor.MiddleCenter;
 
         RectTransform textRectTransform = textObj.GetComponent<RectTransform>();
-        textRectTransform.sizeDelta = new Vector2(160, 30);
-        button.onClick.AddListener(() => scriptButtonFunction());
+        textRectTransform.sizeDelta = _buttonSize;
+        button.onClick.AddListener(() => _buttonFunction());
     }
 
     public void SetFunction1(TestDelegate t_function)
