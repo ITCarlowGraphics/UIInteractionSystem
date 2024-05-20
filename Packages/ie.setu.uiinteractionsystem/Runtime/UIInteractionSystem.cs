@@ -8,6 +8,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using static UIInteractionSystem;
 using UnityEngine.Events;
+using Unity.Plastic.Newtonsoft.Json.Bson;
 
 // [CreateAssetMenu(fileName = "DialogBox")]
 
@@ -28,6 +29,8 @@ public class UIInteractionSystem : MonoBehaviour
     // script button attributes
     public bool createButtonOrNot;
     public int buttonNumbers;
+    // store root game objects
+    private Dictionary<string, GameObject> rootGameObjects = new Dictionary<string, GameObject>();
 
     // instance attributes
     public static UIInteractionSystem _instance;
@@ -56,11 +59,63 @@ public class UIInteractionSystem : MonoBehaviour
     }
 
     //-----------------------------------------------------------------------------------------------------------------//
-    // Script Dialog Box
+    // Enable or Disable Screen
     //-----------------------------------------------------------------------------------------------------------------//
 
-    public void CreatePanel(Canvas _canvas, string _dialogText, Font _dialogTextFont, int _dialogTextSize, string _dialogTextColor, 
-                            string _frontPanelColor, string _backPanelColor, Vector2 _panelSize)
+    public void RegisterRootGameObject(string name, GameObject obj)
+    {
+        if (!rootGameObjects.ContainsKey(name))
+        {
+            rootGameObjects.Add(name, obj);
+        }
+    }
+
+    public void EnableScreen(string _rootGameObjectName)
+    {
+        if (rootGameObjects.TryGetValue(_rootGameObjectName, out GameObject obj))
+        {
+            obj.SetActive(true);
+        }
+    }
+
+    public void DisableScreen(string _rootGameObjectName)
+    {
+        if (rootGameObjects.TryGetValue(_rootGameObjectName, out GameObject obj))
+        {
+            obj.SetActive(false);
+        }
+    }
+
+    public void ToggleScreen(string _rootGameObjectName)
+    {
+        if (rootGameObjects.TryGetValue(_rootGameObjectName, out GameObject obj))
+        {
+            obj.SetActive(!obj.activeSelf);
+        }
+    }
+
+    public void DestroyScreen(string _rootGameObjectName)
+    {
+        if (rootGameObjects.TryGetValue(_rootGameObjectName, out GameObject obj))
+        {
+            rootGameObjects.Remove(_rootGameObjectName);
+            Destroy(obj);
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------//
+    // Script Elements
+    //-----------------------------------------------------------------------------------------------------------------//
+
+    public void CreatePanel(Canvas _canvas, 
+                            string _rootGameObjectName, 
+                            string _dialogText, 
+                            Font _dialogTextFont, 
+                            int _dialogTextSize, 
+                            string _dialogTextColor, 
+                            string _frontPanelColor, 
+                            string _backPanelColor, 
+                            Vector2 _panelSize)
     {
         // Color attributes init
         Color dialogTextColor = new(0, 0, 0);
@@ -79,9 +134,9 @@ public class UIInteractionSystem : MonoBehaviour
             _backPanelColor = _backPanelColor.Insert(0, "#");
         }
         // setParent init
-        if (GameObject.Find("DialogBox") == null)
+        if (GameObject.Find(_rootGameObjectName) == null)
         {
-            GameObject dialogBox = new("DialogBox");
+            GameObject dialogBox = new(_rootGameObjectName);
             dialogBox.transform.SetParent(_canvas.transform, false);
         }
         // color parsement
@@ -101,15 +156,15 @@ public class UIInteractionSystem : MonoBehaviour
         // panels init
         GameObject panelObj_1 = new("Back_Panel");
         GameObject panelObj_2 = new("Front_Panel");
-        panelObj_1.transform.SetParent(GameObject.Find("DialogBox").transform, false);
-        panelObj_2.transform.SetParent(GameObject.Find("DialogBox").transform, false);
+        panelObj_1.transform.SetParent(GameObject.Find(_rootGameObjectName).transform, false);
+        panelObj_2.transform.SetParent(GameObject.Find(_rootGameObjectName).transform, false);
         // panels rect init
         RectTransform rectTransform_1 = panelObj_1.AddComponent<RectTransform>();
         RectTransform rectTransform_2 = panelObj_2.AddComponent<RectTransform>();
         rectTransform_1.sizeDelta = _panelSize;
         rectTransform_2.sizeDelta = _panelSize - new Vector2(25.0f, 25.0f);
-        rectTransform_1.anchoredPosition = new Vector2(0, 0);
-        rectTransform_2.anchoredPosition = new Vector2(0, 0);
+        rectTransform_1.anchoredPosition = new Vector2(0.0f, 0.0f);
+        rectTransform_2.anchoredPosition = new Vector2(0.0f, 0.0f);
         // panels color init
         Image image_1 = panelObj_1.AddComponent<Image>();
         Image image_2 = panelObj_2.AddComponent<Image>();
@@ -117,7 +172,7 @@ public class UIInteractionSystem : MonoBehaviour
         image_2.color = frontPanelColor;
         // text init
         GameObject textObj = new("DialogText");
-        textObj.transform.SetParent(GameObject.Find("DialogBox").transform, false);
+        textObj.transform.SetParent(GameObject.Find(_rootGameObjectName).transform, false);
         Text text = textObj.AddComponent<Text>();
         text.text = _dialogText;
         text.fontSize = _dialogTextSize;
@@ -128,7 +183,8 @@ public class UIInteractionSystem : MonoBehaviour
         textRectTransform.sizeDelta = _panelSize - new Vector2(50.0f, 50.0f);
     }
 
-    public void CreateButton(Canvas _canvas, 
+    public void CreateButton(Canvas _canvas,
+                            string _rootGameObjectName,
                             string _buttonText, 
                             Font _buttonTextFont, 
                             int _buttonTextSize, 
@@ -150,9 +206,9 @@ public class UIInteractionSystem : MonoBehaviour
             _buttonColor = _buttonColor.Insert(0, "#");
         }
         // setParent init
-        if (GameObject.Find("DialogBox") == null)
+        if (GameObject.Find(_rootGameObjectName) == null)
         {
-            GameObject dialogBox = new("DialogBox");
+            GameObject dialogBox = new(_rootGameObjectName);
             dialogBox.transform.SetParent(_canvas.transform, false);
         }
         // color parsement
@@ -166,7 +222,7 @@ public class UIInteractionSystem : MonoBehaviour
         }
 
         GameObject buttonObj = new("Button");
-        buttonObj.transform.SetParent(GameObject.Find("DialogBox").transform, false);
+        buttonObj.transform.SetParent(GameObject.Find(_rootGameObjectName).transform, false);
         RectTransform rectTransform = buttonObj.AddComponent<RectTransform>();
         rectTransform.sizeDelta = _buttonSize;
         rectTransform.anchoredPosition = _buttonAnchoredPosition;
@@ -193,20 +249,30 @@ public class UIInteractionSystem : MonoBehaviour
         button.onClick.AddListener(() => _buttonFunction());
     }
 
-    public void CreateSlider(Canvas _canvas, Vector2 _sliderSize, Vector2 _sliderAnchoredPosition, 
-                            string _sliderName, string _sliderText, Font _sliderTextFont, int _sliderTextSize, string _sliderTextColor,
-                            Sprite _fillImage, Sprite _handleImage)
+    public void CreateSlider(Canvas _canvas, 
+                            string _rootGameObjectName,
+                            float _minValue,
+                            float _maxValue,
+                            Vector2 _sliderSize, 
+                            Vector2 _sliderAnchoredPosition, 
+                            string _sliderName, 
+                            string _sliderText, 
+                            Font _sliderTextFont, 
+                            int _sliderTextSize, 
+                            string _sliderTextColor,
+                            Sprite _fillImage, 
+                            Sprite _handleImage)
     {
         // setParent init
-        if (GameObject.Find("DialogBox") == null)
+        if (GameObject.Find(_rootGameObjectName) == null)
         {
-            GameObject dialogBox = new("DialogBox");
+            GameObject dialogBox = new(_rootGameObjectName);
             dialogBox.transform.SetParent(_canvas.transform, false);
         }
 
         // Create Slider
         GameObject sliderObj = new(_sliderName);
-        sliderObj.transform.SetParent(GameObject.Find("DialogBox").transform, false);
+        sliderObj.transform.SetParent(GameObject.Find(_rootGameObjectName).transform, false);
         RectTransform rectTransform = sliderObj.AddComponent<RectTransform>();
         rectTransform.sizeDelta = _sliderSize;
         rectTransform.anchoredPosition = _sliderAnchoredPosition;
@@ -214,7 +280,6 @@ public class UIInteractionSystem : MonoBehaviour
         GameObject textObj = new("SliderText");
         textObj.transform.SetParent(sliderObj.transform, false);
         Text sliderText = textObj.AddComponent<Text>();
-        sliderText.text = _sliderText; 
         sliderText.font = _sliderTextFont;
         sliderText.fontSize = _sliderTextSize;
         if (!_sliderTextColor.Contains("#"))
@@ -252,19 +317,88 @@ public class UIInteractionSystem : MonoBehaviour
         handle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-10.0f, 0.0f);
         slider.fillRect = fill.GetComponent<RectTransform>();
         slider.handleRect = handle.GetComponent<RectTransform>();
-        slider.minValue = 0;
-        slider.maxValue = 100;
+        slider.minValue = _minValue;
+        slider.maxValue = _maxValue;
+        sliderText.text = _sliderText + ": " + slider.value.ToString();
         rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x / 2, rectTransform.sizeDelta.y / 2);
+        slider.onValueChanged.AddListener((v) =>
+        {
+            sliderText.text = _sliderText + ": " + slider.value.ToString();
+        });
     }
 
-    public float GetSliderValue(string _sliderName, float _changedValue)
+    public float GetSliderValue(string _sliderName, string _rootGameObjectName, float _changedValue)
     {
-        if (GameObject.Find("DialogBox") != null &&
-            _changedValue != GameObject.Find(_sliderName).GetComponent<Slider>().value)
+        if (GameObject.Find(_sliderName) != null && rootGameObjects.TryGetValue(_rootGameObjectName, out _))
         {
             return GameObject.Find(_sliderName).GetComponent<Slider>().value;
         }
         return _changedValue;
+    }
+
+    public void CreateText(Canvas _canvas, 
+                        string _rootGameObjectName,
+                        string _text, 
+                        Font _font, 
+                        int _fontSize, 
+                        string _textColor,
+                        Vector2 _position, 
+                        Vector2 _size, 
+                        TextAnchor _alignment = TextAnchor.MiddleCenter)
+    {
+        // Ensure the parent exists
+        if (GameObject.Find(_rootGameObjectName) == null)
+        {
+            GameObject dialogBox = new(_rootGameObjectName);
+            dialogBox.transform.SetParent(_canvas.transform, false);
+        }
+
+        // Create the text object
+        GameObject textObj = new("Text");
+        textObj.transform.SetParent(GameObject.Find(_rootGameObjectName).transform, false);
+        RectTransform textRectTransform = textObj.AddComponent<RectTransform>();
+        textRectTransform.sizeDelta = _size;
+        textRectTransform.anchoredPosition = _position;
+
+        Text textComponent = textObj.AddComponent<Text>();
+        textComponent.text = _text;
+        textComponent.font = _font;
+        textComponent.fontSize = _fontSize;
+        textComponent.alignment = _alignment;
+
+        if (!_textColor.Contains("#"))
+        {
+            _textColor = _textColor.Insert(0, "#");
+        }
+        if (ColorUtility.TryParseHtmlString(_textColor, out Color textColor))
+        {
+            textComponent.color = textColor;
+        }
+    }
+
+    public void CreateImage(Canvas _canvas,
+                        string _rootGameObjectName, 
+                        string _imageName, 
+                        Vector2 _position, 
+                        Vector2 _size, 
+                        Sprite _image)
+    {
+        // Ensure the parent exists
+        if (GameObject.Find(_rootGameObjectName) == null)
+        {
+            GameObject dialogBox = new(_rootGameObjectName);
+            dialogBox.transform.SetParent(_canvas.transform, false);
+        }
+
+        // Create the image object
+        GameObject imageObj = new(_imageName);
+        imageObj.transform.SetParent(GameObject.Find(_rootGameObjectName).transform, false);
+        RectTransform imageRectTransform = imageObj.AddComponent<RectTransform>();
+        imageRectTransform.sizeDelta = _size;
+        imageRectTransform.anchoredPosition = _position;
+
+        Image imageComponent = imageObj.AddComponent<Image>();
+        imageComponent.sprite = _image;
     }
 }
 
