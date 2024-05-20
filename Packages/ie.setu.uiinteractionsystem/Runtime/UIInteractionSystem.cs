@@ -6,6 +6,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using static UIInteractionSystem;
+using UnityEngine.Events;
 
 // [CreateAssetMenu(fileName = "DialogBox")]
 
@@ -53,108 +55,12 @@ public class UIInteractionSystem : MonoBehaviour
         }
     }
 
-    /*
-    public void InstantiatePrefab(string addressableKey)
-    {
-        Addressables.InstantiateAsync(addressableKey).Completed += OnPrefabInstantiated;
-    }
-
-    private void OnPrefabInstantiated(AsyncOperationHandle<GameObject> obj)
-    {
-        if (obj.Status == AsyncOperationStatus.Succeeded)
-        {
-            dialogBoxPrefab = obj.Result;
-        }
-        else
-        {
-            Debug.LogError("Failed to load the prefab.");
-        }
-    }
-
-    public void InstantiateSettingMenuPrefab(string addressableKey)
-    {
-        Addressables.InstantiateAsync(addressableKey).Completed += OnSettingMenuInstantiated;
-    }
-
-    private void OnSettingMenuInstantiated(AsyncOperationHandle<GameObject> obj)
-    {
-        if (obj.Status == AsyncOperationStatus.Succeeded)
-        {
-            settingMenuPrefab = obj.Result;
-        }
-        else
-        {
-            Debug.LogError("Failed to load the setting menu prefab.");
-        }
-    }
-
-    // trigger one button only
-    public IEnumerator ShowDialog(string dialogText, string buttonText, TestDelegate buttonFunction)
-    {
-        canvas = FindObjectOfType<Canvas>();
-        SetFunction1(buttonFunction);
-        // dialog box init
-        InstantiatePrefab("Packages/ie.setu.uiinteractionsystem/Runtime/DialogBox.prefab");
-        yield return new WaitUntil(() => dialogBoxPrefab != null);
-        GameObject dialogBox = Instantiate(dialogBoxPrefab);
-        dialogBox.transform.SetParent(canvas.transform, false);
-        dialogBox.transform.Find("One_Button").gameObject.SetActive(true);
-        // dialog box text init
-        TextMeshProUGUI dialogTextComponent = dialogBox.transform.Find("Text").gameObject.GetComponent<TextMeshProUGUI>();
-        dialogTextComponent.text = dialogText;
-        // dialog box button init
-        Button button = dialogBox.transform.Find("One_Button/Button_1").gameObject.GetComponent<Button>();
-        button.GetComponentInChildren<TextMeshProUGUI>().text = buttonText;
-        button.onClick.AddListener(() => function1());
-    }
-
-    public IEnumerator ShowDialogTwoButton(string dialogText, string buttonText_1, TestDelegate buttonFunction_1, string buttonText_2, TestDelegate buttonFunction_2)
-    {
-        canvas = FindObjectOfType<Canvas>();
-        SetFunction1(buttonFunction_1);
-        SetFunction2(buttonFunction_2);
-        // dialog box init
-        InstantiatePrefab("Packages/ie.setu.uiinteractionsystem/Runtime/DialogBox.prefab");
-        yield return new WaitUntil(() => dialogBoxPrefab != null);
-        GameObject dialogBox = Instantiate(dialogBoxPrefab);
-        dialogBox.transform.SetParent(canvas.transform, false);
-        dialogBox.transform.Find("Two_Button").gameObject.SetActive(true);
-        // dialog box text init
-        TextMeshProUGUI dialogTextComponent = dialogBox.transform.Find("Text").gameObject.GetComponent<TextMeshProUGUI>();
-        dialogTextComponent.text = dialogText;
-        // dialog box button init
-        Button button_1 = dialogBox.transform.Find("Two_Button/Button_1").gameObject.GetComponent<Button>();
-        button_1.GetComponentInChildren<TextMeshProUGUI>().text = buttonText_1;
-        button_1.onClick.AddListener(() => function1());
-        Button button_2 = dialogBox.transform.Find("Two_Button/Button_2").gameObject.GetComponent<Button>();
-        button_2.GetComponentInChildren<TextMeshProUGUI>().text = buttonText_2;
-        button_2.onClick.AddListener(() => function2());
-
-    }
-
-    public IEnumerator ShowSettingMenu()
-    {
-        canvas = FindObjectOfType<Canvas>();
-        if (GameObject.FindGameObjectWithTag("SettingMenu") != null)
-        {
-            GameObject.FindGameObjectWithTag("SettingMenu").SetActive(true);
-            yield return null;
-        }
-        else
-        {
-            // setting menu init
-            InstantiateSettingMenuPrefab("Packages/ie.setu.uiinteractionsystem/Runtime/SettingMenu.prefab");
-            yield return new WaitUntil(() => settingMenuPrefab != null);
-            GameObject.FindGameObjectWithTag("SettingMenu").transform.SetParent(canvas.transform, false);
-        }
-    }
-    */
-
     //-----------------------------------------------------------------------------------------------------------------//
     // Script Dialog Box
     //-----------------------------------------------------------------------------------------------------------------//
 
-    public void CreatePanel(Canvas _canvas, string _dialogText, Font _dialogTextFont, int _dialogTextSize, string _dialogTextColor, string _frontPanelColor, string _backPanelColor, Vector2 _panelSize)
+    public void CreatePanel(Canvas _canvas, string _dialogText, Font _dialogTextFont, int _dialogTextSize, string _dialogTextColor, 
+                            string _frontPanelColor, string _backPanelColor, Vector2 _panelSize)
     {
         // Color attributes init
         Color dialogTextColor = new(0, 0, 0);
@@ -222,7 +128,15 @@ public class UIInteractionSystem : MonoBehaviour
         textRectTransform.sizeDelta = _panelSize - new Vector2(50.0f, 50.0f);
     }
 
-    public void CreateButton(Canvas _canvas, string _buttonText, Font _buttonTextFont, int _buttonTextSize, string _buttonTextColor, string _buttonColor, Vector2 _buttonSize, Vector2 _buttonAnchoredPosition, TestDelegate _buttonFunction)
+    public void CreateButton(Canvas _canvas, 
+                            string _buttonText, 
+                            Font _buttonTextFont, 
+                            int _buttonTextSize, 
+                            string _buttonTextColor, 
+                            string _buttonColor, 
+                            Vector2 _buttonSize, 
+                            Vector2 _buttonAnchoredPosition, 
+                            TestDelegate _buttonFunction)
     {
         // Color attributes init
         Color buttonTextColor = new(0, 0, 0);
@@ -279,18 +193,191 @@ public class UIInteractionSystem : MonoBehaviour
         button.onClick.AddListener(() => _buttonFunction());
     }
 
-    public void SetFunction1(TestDelegate t_function)
+    public void CreateSlider(Canvas _canvas, Vector2 _sliderSize, Vector2 _sliderAnchoredPosition, 
+                            string _sliderName, string _sliderText, Font _sliderTextFont, int _sliderTextSize, string _sliderTextColor,
+                            Sprite _fillImage, Sprite _handleImage)
     {
-        function1 = t_function;
+        // setParent init
+        if (GameObject.Find("DialogBox") == null)
+        {
+            GameObject dialogBox = new("DialogBox");
+            dialogBox.transform.SetParent(_canvas.transform, false);
+        }
+
+        // Create Slider
+        GameObject sliderObj = new(_sliderName);
+        sliderObj.transform.SetParent(GameObject.Find("DialogBox").transform, false);
+        RectTransform rectTransform = sliderObj.AddComponent<RectTransform>();
+        rectTransform.sizeDelta = _sliderSize;
+        rectTransform.anchoredPosition = _sliderAnchoredPosition;
+        // Create Text
+        GameObject textObj = new("SliderText");
+        textObj.transform.SetParent(sliderObj.transform, false);
+        Text sliderText = textObj.AddComponent<Text>();
+        sliderText.text = _sliderText; 
+        sliderText.font = _sliderTextFont;
+        sliderText.fontSize = _sliderTextSize;
+        if (!_sliderTextColor.Contains("#"))
+        {
+            _sliderTextColor = _sliderTextColor.Insert(0, "#");
+        }
+        if (ColorUtility.TryParseHtmlString(_sliderTextColor, out Color textColor))
+        {
+            sliderText.color = textColor;
+        }
+        sliderText.alignment = TextAnchor.MiddleCenter;
+        // Position the text above the slider
+        RectTransform textRectTransform = textObj.GetComponent<RectTransform>();
+        textRectTransform.sizeDelta = new Vector2(_sliderSize.x * 2, _sliderTextSize * 2); // Adjust height based on text size
+        textRectTransform.anchoredPosition = new Vector2(0, _sliderSize.y / 2 + _sliderTextSize); // Position text above sliders
+
+        // Create Slider
+        Slider slider = sliderObj.AddComponent<Slider>();
+        // fill
+        GameObject fill = new("Fill");
+        fill.transform.SetParent(slider.transform, false);
+        Image fillImage = fill.AddComponent<Image>();
+        Sprite fillSprite = _fillImage;
+        fillImage.sprite = fillSprite;
+        // handle
+        GameObject handle = new("Handle");
+        handle.transform.SetParent(slider.transform, false);
+        Image handleImage = handle.AddComponent<Image>();
+        Sprite handleSprite = _handleImage;
+        handleImage.sprite = handleSprite;
+        // slider, fill & handle init
+        fill.GetComponent<RectTransform>().sizeDelta = new Vector2(10.0f, _sliderSize.y / 10);
+        fill.GetComponent<RectTransform>().anchoredPosition = new Vector2(-10.0f, 0.0f);
+        handle.GetComponent<RectTransform>().sizeDelta = new Vector2(_sliderSize.x / 5, _sliderSize.x / 10);
+        handle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-10.0f, 0.0f);
+        slider.fillRect = fill.GetComponent<RectTransform>();
+        slider.handleRect = handle.GetComponent<RectTransform>();
+        slider.minValue = 0;
+        slider.maxValue = 100;
+        rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x / 2, rectTransform.sizeDelta.y / 2);
     }
 
-    public void SetFunction2(TestDelegate t_function)
+    public float GetSliderValue(string _sliderName, float _changedValue)
     {
-        function2 = t_function;
-    }
-
-    public void SetScriptButtonFunction(TestDelegate t_function)
-    {
-        scriptButtonFunction = t_function;
+        if (GameObject.Find("DialogBox") != null &&
+            _changedValue != GameObject.Find(_sliderName).GetComponent<Slider>().value)
+        {
+            return GameObject.Find(_sliderName).GetComponent<Slider>().value;
+        }
+        return _changedValue;
     }
 }
+
+/*
+public void SetFunction1(TestDelegate t_function)
+{
+    function1 = t_function;
+}
+
+public void SetFunction2(TestDelegate t_function)
+{
+    function2 = t_function;
+}
+
+public void SetScriptButtonFunction(TestDelegate t_function)
+{
+    scriptButtonFunction = t_function;
+}
+*/
+
+/*
+public void InstantiatePrefab(string addressableKey)
+{
+    Addressables.InstantiateAsync(addressableKey).Completed += OnPrefabInstantiated;
+}
+
+private void OnPrefabInstantiated(AsyncOperationHandle<GameObject> obj)
+{
+    if (obj.Status == AsyncOperationStatus.Succeeded)
+    {
+        dialogBoxPrefab = obj.Result;
+    }
+    else
+    {
+        Debug.LogError("Failed to load the prefab.");
+    }
+}
+
+public void InstantiateSettingMenuPrefab(string addressableKey)
+{
+    Addressables.InstantiateAsync(addressableKey).Completed += OnSettingMenuInstantiated;
+}
+
+private void OnSettingMenuInstantiated(AsyncOperationHandle<GameObject> obj)
+{
+    if (obj.Status == AsyncOperationStatus.Succeeded)
+    {
+        settingMenuPrefab = obj.Result;
+    }
+    else
+    {
+        Debug.LogError("Failed to load the setting menu prefab.");
+    }
+}
+
+// trigger one button only
+public IEnumerator ShowDialog(string dialogText, string buttonText, TestDelegate buttonFunction)
+{
+    canvas = FindObjectOfType<Canvas>();
+    SetFunction1(buttonFunction);
+    // dialog box init
+    InstantiatePrefab("Packages/ie.setu.uiinteractionsystem/Runtime/DialogBox.prefab");
+    yield return new WaitUntil(() => dialogBoxPrefab != null);
+    GameObject dialogBox = Instantiate(dialogBoxPrefab);
+    dialogBox.transform.SetParent(canvas.transform, false);
+    dialogBox.transform.Find("One_Button").gameObject.SetActive(true);
+    // dialog box text init
+    TextMeshProUGUI dialogTextComponent = dialogBox.transform.Find("Text").gameObject.GetComponent<TextMeshProUGUI>();
+    dialogTextComponent.text = dialogText;
+    // dialog box button init
+    Button button = dialogBox.transform.Find("One_Button/Button_1").gameObject.GetComponent<Button>();
+    button.GetComponentInChildren<TextMeshProUGUI>().text = buttonText;
+    button.onClick.AddListener(() => function1());
+}
+
+public IEnumerator ShowDialogTwoButton(string dialogText, string buttonText_1, TestDelegate buttonFunction_1, string buttonText_2, TestDelegate buttonFunction_2)
+{
+    canvas = FindObjectOfType<Canvas>();
+    SetFunction1(buttonFunction_1);
+    SetFunction2(buttonFunction_2);
+    // dialog box init
+    InstantiatePrefab("Packages/ie.setu.uiinteractionsystem/Runtime/DialogBox.prefab");
+    yield return new WaitUntil(() => dialogBoxPrefab != null);
+    GameObject dialogBox = Instantiate(dialogBoxPrefab);
+    dialogBox.transform.SetParent(canvas.transform, false);
+    dialogBox.transform.Find("Two_Button").gameObject.SetActive(true);
+    // dialog box text init
+    TextMeshProUGUI dialogTextComponent = dialogBox.transform.Find("Text").gameObject.GetComponent<TextMeshProUGUI>();
+    dialogTextComponent.text = dialogText;
+    // dialog box button init
+    Button button_1 = dialogBox.transform.Find("Two_Button/Button_1").gameObject.GetComponent<Button>();
+    button_1.GetComponentInChildren<TextMeshProUGUI>().text = buttonText_1;
+    button_1.onClick.AddListener(() => function1());
+    Button button_2 = dialogBox.transform.Find("Two_Button/Button_2").gameObject.GetComponent<Button>();
+    button_2.GetComponentInChildren<TextMeshProUGUI>().text = buttonText_2;
+    button_2.onClick.AddListener(() => function2());
+
+}
+
+public IEnumerator ShowSettingMenu()
+{
+    canvas = FindObjectOfType<Canvas>();
+    if (GameObject.FindGameObjectWithTag("SettingMenu") != null)
+    {
+        GameObject.FindGameObjectWithTag("SettingMenu").SetActive(true);
+        yield return null;
+    }
+    else
+    {
+        // setting menu init
+        InstantiateSettingMenuPrefab("Packages/ie.setu.uiinteractionsystem/Runtime/SettingMenu.prefab");
+        yield return new WaitUntil(() => settingMenuPrefab != null);
+        GameObject.FindGameObjectWithTag("SettingMenu").transform.SetParent(canvas.transform, false);
+    }
+}
+*/

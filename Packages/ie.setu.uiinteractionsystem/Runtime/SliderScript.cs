@@ -35,7 +35,7 @@ public class SliderScript : MonoBehaviour
             _questionTimeLimitSlider.GetComponent<Slider>().value = Instance.questionTimeLimit;
             _questionTimeLimitNumberText.GetComponent<TextMeshProUGUI>().text = _questionTimeLimitSlider.GetComponent<Slider>().value.ToString("0") + " seconds";
         }
-
+        
         _volumeSlider.GetComponent<Slider>().onValueChanged.AddListener((v) =>
         {
             Instance.soundVolumeCoefficient = _volumeSlider.GetComponent<Slider>().value / 100.0f;
