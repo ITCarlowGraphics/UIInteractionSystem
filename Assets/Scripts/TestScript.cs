@@ -7,6 +7,8 @@ using UnityEngine;
 public class TestScript : MonoBehaviour
 {
     public float testValue = 10.0f;
+    public float volumeCoefficient = 0.0f;
+    public float questionTimer = 20.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -28,6 +30,14 @@ public class TestScript : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             CreateLeaderboard();
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            CreateMainMenu();
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            CreateSettingMenu();
         }
 
 
@@ -56,6 +66,15 @@ public class TestScript : MonoBehaviour
             "Test Slider",                                              // name of slider gameObject
             "Dialog Box",                                               // dictionary string of specific screen
             testValue);                                                 // the value gonna be changed
+
+        volumeCoefficient = UIInteractionSystem.Instance.GetSliderValue(
+            "Volume Slider",                                        // name of slider gameObject
+            "Setting Menu",                                         // dictionary string of specific screen
+            volumeCoefficient);                                     // the value gonna be changed
+        questionTimer = UIInteractionSystem.Instance.GetSliderValue(
+            "Question Timer Slider",                                // name of slider gameObject
+            "Setting Menu",                                         // dictionary string of specific screen
+            questionTimer);                                         // the value gonna be changed
     }
 
     public void ButtonClicked()
@@ -252,19 +271,220 @@ public class TestScript : MonoBehaviour
          ***** Create Trophy Image *****
          *******************************/
         UIInteractionSystem.Instance.CreateImage(
-            GameObject.Find("Canvas").GetComponent<Canvas>(),                   // canvas gameObject
-            "Leaderboard Menu",                                                 // name of root(parent) gameObject
-            "Trophy",                                                           // name of image gameObject
-            new Vector2(0.0f, -250.0f),                                          // image offset position
-            new Vector2(200.0f, 150.0f),                                        // image size
-            Resources.Load<Sprite>("Trophy"));                                  // image resource
+            GameObject.Find("Canvas").GetComponent<Canvas>(),           // canvas gameObject
+            "Leaderboard Menu",                                         // name of root(parent) gameObject
+            "Trophy",                                                   // name of image gameObject
+            new Vector2(0.0f, -250.0f),                                 // image offset position
+            new Vector2(200.0f, 150.0f),                                // image size
+            Resources.Load<Sprite>("Trophy"));                          // image resource
 
         /*******************************
          *** register root gameObject **
          *******************************/
         UIInteractionSystem.Instance.RegisterRootGameObject(
-            "Leaderboard Menu",                                                     // dictionary string of specific screen
-            GameObject.Find("Leaderboard Menu"));                                   // name of root gameObject
+            "Leaderboard Menu",                                         // dictionary string of specific screen
+            GameObject.Find("Leaderboard Menu"));                       // name of root gameObject
+    }
+
+    void CreateMainMenu()
+    {
+        /* Start Screen*/
+        UIInteractionSystem.Instance.CreatePanel(
+            GameObject.Find("Canvas").GetComponent<Canvas>(),                       // canvas gameObject
+            "Start Screen",                                                         // the name of root(parent) gameObject
+            "",                                                                     // text on panel
+            Resources.Load<Font>("Nunito-Bold"),                                    // font usef for text
+            0,                                                                      // text character size
+            "#FFFFFF",                                                              // text color
+            "#EBFF00",                                                              // front panel color
+            "#FFFFFF",                                                              // back panel color
+            new Vector2(500.0f, 800.0f));                                           // size of the whole panel
+        UIInteractionSystem.Instance.CreateButton(
+                GameObject.Find("Canvas").GetComponent<Canvas>(),                           // canvas gameObject
+                "Start Screen",                                                             // name of root(parent) gameObject
+                "Press To Play",                                                            // text appear on button
+                Resources.Load<Font>("Nunito-Bold"),                                        // font used for button text
+                20,                                                                         // button text character size
+                "000000",                                                                   // button text color
+                "#D9D9D9",                                                                  // color of button
+                new Vector2(300.0f, 50.0f),                                                 // button size
+                new Vector2(0, -300.0f),                                                    // anchored position of button
+                () => UIInteractionSystem.Instance.DisableScreen("Start Screen"),           // function will be executed when button OnClick
+                () => UIInteractionSystem.Instance.EnableScreen("Menu Screen"));            // 2nd function will be executed when button OnClick
+        UIInteractionSystem.Instance.CreateImage(
+            GameObject.Find("Canvas").GetComponent<Canvas>(),                   // canvas gameObject
+            "Start Screen",                                                     // name of root(parent) gameObject
+            "TOTC_Title",                                                       // name of image gameObject
+            new Vector2(0.0f, 0.0f),                                            // image offset position
+            new Vector2(200.0f, 100.0f),                                        // image size
+            Resources.Load<Sprite>("TOTC_Title"));                              // image resource
+
+
+        /* Menu Screen */
+        UIInteractionSystem.Instance.CreatePanel(
+            GameObject.Find("Canvas").GetComponent<Canvas>(),                       // canvas gameObject
+            "Menu Screen",                                                          // the name of root(parent) gameObject
+            "",                                                                     // text on panel
+            Resources.Load<Font>("Nunito-Bold"),                                    // font usef for text
+            0,                                                                      // text character size
+            "#FFFFFF",                                                              // text color
+            "#EBFF00",                                                              // front panel color
+            "#FFFFFF",                                                              // back panel color
+            new Vector2(500.0f, 800.0f));                                           // size of the whole panel
+
+        string[] buttonText1 = { "Setting", "Choose\nGameMode" };
+        for (int i = 0; i < buttonText1.Length; i++)
+        {
+            UIInteractionSystem.Instance.CreateButton(
+                    GameObject.Find("Canvas").GetComponent<Canvas>(),                           // canvas gameObject
+                    "Menu Screen",                                                              // name of root(parent) gameObject
+                    buttonText1[i],                                                             // text appear on button
+                    Resources.Load<Font>("Nunito-Bold"),                                        // font used for button text
+                    25,                                                                         // button text character size
+                    "000000",                                                                   // button text color
+                    "#D9D9D9",                                                                  // color of button
+                    new Vector2(300.0f, 50.0f),                                                 // button size
+                    new Vector2(0, -300.0f + i * 75.0f),                                        // anchored position of button
+                    () => UIInteractionSystem.Instance.DisableScreen("Menu Screen"),            // function will be executed when button OnClick
+                    () => UIInteractionSystem.Instance.EnableScreen("GameModes Screen"));       // 2nd function will be executed when button OnClick
+        }
+        UIInteractionSystem.Instance.CreateImage(
+            GameObject.Find("Canvas").GetComponent<Canvas>(),                   // canvas gameObject
+            "Menu Screen",                                                      // name of root(parent) gameObject
+            "TOTC_Title",                                                       // name of image gameObject
+            new Vector2(0.0f, 300.0f),                                          // image offset position
+            new Vector2(200.0f, 100.0f),                                        // image size
+            Resources.Load<Sprite>("TOTC_Title"));                              // image resource
+
+        /* GameModes Screen */
+        UIInteractionSystem.Instance.CreatePanel(
+            GameObject.Find("Canvas").GetComponent<Canvas>(),                       // canvas gameObject
+            "GameModes Screen",                                                     // the name of root(parent) gameObject
+            "",                                                                     // text on panel
+            Resources.Load<Font>("Nunito-Bold"),                                    // font usef for text
+            0,                                                                      // text character size
+            "#FFFFFF",                                                              // text color
+            "#EBFF00",                                                              // front panel color
+            "#FFFFFF",                                                              // back panel color
+            new Vector2(500.0f, 800.0f));                                           // size of the whole panel
+
+        string[] buttonText2 = { "Companion", "AR", "Local" };
+        for (int i = 0; i < buttonText2.Length; i++)
+        {
+            UIInteractionSystem.Instance.CreateButton(
+                    GameObject.Find("Canvas").GetComponent<Canvas>(),                           // canvas gameObject
+                    "GameModes Screen",                                                         // name of root(parent) gameObject
+                    buttonText2[i],                                                             // text appear on button
+                    Resources.Load<Font>("Nunito-Bold"),                                        // font used for button text
+                    25,                                                                         // button text character size
+                    "000000",                                                                   // button text color
+                    "#D9D9D9",                                                                  // color of button
+                    new Vector2(300.0f, 50.0f),                                                 // button size
+                    new Vector2(0, -300.0f + i * 75.0f),                                        // anchored position of button
+                    () => UIInteractionSystem.Instance.DisableScreen("GameModes Screen"));      // function will be executed when button OnClick
+        }
+        UIInteractionSystem.Instance.CreateImage(
+            GameObject.Find("Canvas").GetComponent<Canvas>(),                   // canvas gameObject
+            "GameModes Screen",                                                 // name of root(parent) gameObject
+            "TOTC_Title",                                                       // name of image gameObject
+            new Vector2(0.0f, 300.0f),                                          // image offset position
+            new Vector2(200.0f, 100.0f),                                        // image size
+            Resources.Load<Sprite>("TOTC_Title"));                              // image resource
+
+        /*******************************
+         *** register root gameObject **
+         *******************************/
+        UIInteractionSystem.Instance.RegisterRootGameObject(
+            "Start Screen",                                         // dictionary string of specific screen
+            GameObject.Find("Start Screen"));                       // name of root gameObject
+        UIInteractionSystem.Instance.RegisterRootGameObject(
+            "Menu Screen",                                          // dictionary string of specific screen
+            GameObject.Find("Menu Screen"));                        // name of root gameObject
+        UIInteractionSystem.Instance.RegisterRootGameObject(
+            "GameModes Screen",                                     // dictionary string of specific screen
+            GameObject.Find("GameModes Screen"));                   // name of root gameObject
+
+        UIInteractionSystem.Instance.DisableScreen("Menu Screen");
+        UIInteractionSystem.Instance.DisableScreen("GameModes Screen");
+    }
+
+    void CreateSettingMenu()
+    {
+        /*******************************
+         ********* Create Panel ********
+         *******************************/
+        UIInteractionSystem.Instance.CreatePanel(
+            GameObject.Find("Canvas").GetComponent<Canvas>(),       // canvas gameObject
+            "Setting Menu",                                         // the name of root(parent) gameObject
+            "Settings",                                             // text on panel
+            Resources.Load<Font>("Nunito-Bold"),                    // font usef for text
+            30,                                                     // text character size
+            "#000000",                                              // text color
+            "#F8BA42",                                              // front panel color
+            "#FFFCE4",                                              // back panel color
+            new Vector2(500.0f, 500.0f));                           // size of the whole panel
+
+        /*******************************
+         ***** Create Volume Slider ****
+         *******************************/
+        UIInteractionSystem.Instance.CreateSlider(
+            GameObject.Find("Canvas").GetComponent<Canvas>(),       // canvas gameObject
+            "Setting Menu",                                         // name of root(parent) gameObject
+            0.0f,                                                   // min value for slider
+            100.0f,                                                 // max value for slider
+            new Vector2(200.0f, 50.0f),                             // size of the slider
+            new Vector2(0.0f, 50.0f),                               // slider offset position
+            "Volume Slider",                                        // name of slider gameObject
+            "Volume",                                               // text for slider
+            Resources.Load<Font>("Nunito-Bold"),                    // font used for slider text
+            25,                                                     // character size of slider text
+            "FFFFFF",                                               // color of slider text
+            Resources.Load<Sprite>("sand"),                         // image for slider FILL
+            Resources.Load<Sprite>("desert"),                       // image for slider HANDLE
+            "%",                                                    // value unit measurement
+            volumeCoefficient);                                     // value is going to be changed
+
+        /********************************
+         * Create Question Timer Slider *
+         ********************************/
+        UIInteractionSystem.Instance.CreateSlider(
+            GameObject.Find("Canvas").GetComponent<Canvas>(),       // canvas gameObject
+            "Setting Menu",                                         // name of root(parent) gameObject
+            20.0f,                                                  // min value for slider
+            120.0f,                                                 // max value for slider
+            new Vector2(200.0f, 50.0f),                             // size of the slider
+            new Vector2(0.0f, -100.0f),                             // slider offset position
+            "Question Timer Slider",                                // name of slider gameObject
+            "Question Time Limit",                                  // text for slider
+            Resources.Load<Font>("Nunito-Bold"),                    // font used for slider text
+            25,                                                     // character size of slider text
+            "FFFFFF",                                               // color of slider text
+            Resources.Load<Sprite>("sand"),                         // image for slider FILL
+            Resources.Load<Sprite>("desert"),                       // image for slider HANDLE
+            "seconds",                                              // value unit measurement
+            questionTimer);                                         // value is going to be changed
+
+        /*******************************
+         ******** Create Button ********
+         *******************************/
+        UIInteractionSystem.Instance.CreateButton(
+            GameObject.Find("Canvas").GetComponent<Canvas>(),       // canvas gameObject
+            "Setting Menu",                                         // name of root(parent) gameObject
+            "Save & Exit",                                          // text appear on button
+            Resources.Load<Font>("Nunito-Bold"),                    // font used for button text
+            25,                                                     // button text character size
+            "#F8BA42",                                              // button text color
+            "#FFFCE4",                                              // color of button
+            new Vector2(200, 50),                                   // button size
+            new Vector2(0, -200),                                   // anchored position of button
+            () => UIInteractionSystem.Instance.DestroyScreen("Setting Menu"));// function will be executed when button OnClick
+
+        /*******************************
+         *** register root gameObject **
+         *******************************/
+        UIInteractionSystem.Instance.RegisterRootGameObject(
+            "Setting Menu",                                         // dictionary string of specific screen
+            GameObject.Find("Setting Menu"));                       // name of root gameObject
     }
 }
 
