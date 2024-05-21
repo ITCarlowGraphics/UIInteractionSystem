@@ -103,6 +103,18 @@ public class UIInteractionSystem : MonoBehaviour
         }
     }
 
+    public void DestroyAllScreen()
+    {
+        foreach (var KeynValue in rootGameObjects)
+        {
+            if (KeynValue.Value != null)
+            {
+                Destroy(KeynValue.Value);
+            }
+        }
+        rootGameObjects.Clear();
+    }
+
     //-----------------------------------------------------------------------------------------------------------------//
     // Script Elements
     //-----------------------------------------------------------------------------------------------------------------//
@@ -192,7 +204,7 @@ public class UIInteractionSystem : MonoBehaviour
                             string _buttonColor, 
                             Vector2 _buttonSize, 
                             Vector2 _buttonAnchoredPosition, 
-                            TestDelegate _buttonFunction,
+                            TestDelegate _buttonFunction = null,
                             TestDelegate _buttonFunction2 = null,
                             TestDelegate _buttonFunction3 = null)
     {
@@ -248,7 +260,10 @@ public class UIInteractionSystem : MonoBehaviour
 
         RectTransform textRectTransform = textObj.GetComponent<RectTransform>();
         textRectTransform.sizeDelta = _buttonSize;
-        button.onClick.AddListener(() => _buttonFunction());
+        if (_buttonFunction != null)
+        {
+            button.onClick.AddListener(() => _buttonFunction());
+        }
         if (_buttonFunction2 != null)
         {
             button.onClick.AddListener(() => _buttonFunction2());
