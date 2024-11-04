@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_Data:
+    m_SerializedData: []
+  m_GUID: f466756954c246c4e8099234da4492b8
+  m_SerializeEntries:
+  - m_GUID: 5c6f4a098d4437444bf6e2a2c6e287fe
+    m_Address: Packages/ie.setu.uiinteractionsystem/Runtime/DialogBox.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6d322224d23ece1479b0d42d51a7b416
+    m_Address: Packages/ie.setu.uiinteractionsystem/Runtime/SettingMenu.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: fc7a8b081c517d44f8973599d7e5bdb4, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: d7469225c1e09b4438e0a0d87ec18392, type: 2}
+    - {fileID: 11400000, guid: f486403b0aa68b54db67cafd956e63b2, type: 2}
