@@ -27,6 +27,8 @@ public class UIInteractionSystem : MonoBehaviour
     public float soundVolumeCoefficient = 100.0f;
     // script button attributes
     public bool createButtonOrNot;
+    public bool powerupsEnabled;
+    public bool enabledShakeFeature;
     public int buttonNumbers;
     // store root game objects
     private Dictionary<string, GameObject> rootGameObjects = new Dictionary<string, GameObject>();
