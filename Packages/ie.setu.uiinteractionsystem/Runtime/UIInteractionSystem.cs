@@ -263,6 +263,110 @@ public class UIInteractionSystem : MonoBehaviour
     // Script Elements
     //-----------------------------------------------------------------------------------------------------------------//
 
+    // Creates a toggle button that when clicked on switches its state (bool)
+    public void CreateToggle(Canvas canvas, string rootName, string labelText, Font font, int fontSize,
+                             string textColor, string textOnState, string textOffState, Vector2 toggleSize,
+                             Vector2 handleSize, Vector2 position, UnityAction<bool> onValueChanged)
+    {
+        // Ensure parent exists
+        if (GameObject.Find(rootName) == null)
+        {
+            GameObject root = new GameObject(rootName);
+            root.transform.SetParent(canvas.transform, false);
+        }
+
+        // Create the toggle container
+        GameObject toggleGO = new GameObject("ToggleContainer");
+        toggleGO.transform.SetParent(GameObject.Find(rootName).transform, false);
+
+        // Set RectTransform for the toggle container
+        RectTransform containerRect = toggleGO.AddComponent<RectTransform>();
+        containerRect.sizeDelta = toggleSize;
+        containerRect.anchoredPosition = position;
+
+        // Create the label text above the toggle
+        GameObject labelGO = new GameObject("Label");
+        labelGO.transform.SetParent(toggleGO.transform, false);
+        Text labelTextComponent = labelGO.AddComponent<Text>();
+        labelTextComponent.text = labelText;
+        labelTextComponent.font = font;
+        labelTextComponent.fontSize = fontSize;
+        ColorUtility.TryParseHtmlString(textColor, out Color parsedTextColor);
+        labelTextComponent.color = parsedTextColor;
+        labelTextComponent.alignment = TextAnchor.MiddleCenter;
+
+        RectTransform labelRect = labelGO.GetComponent<RectTransform>();
+        labelRect.sizeDelta = new Vector2(toggleSize.x, fontSize + 10);
+        labelRect.anchoredPosition = new Vector2(0, (toggleSize.y / 1.5f) + 5);
+
+        // Create the toggle background
+        GameObject backgroundGO = new GameObject("Background");
+        backgroundGO.transform.SetParent(toggleGO.transform, false);
+        RectTransform bgRect = backgroundGO.AddComponent<RectTransform>();
+        bgRect.sizeDelta = toggleSize;
+        bgRect.anchoredPosition = Vector2.zero;
+
+        Image backgroundImage = backgroundGO.AddComponent<Image>();
+        backgroundImage.color = Color.red; // Initial state (off)
+
+        Button backgroundButton = backgroundGO.AddComponent<Button>();
+
+        // Create the toggle switch's handle
+        GameObject handleGO = new GameObject("Handle");
+        handleGO.transform.SetParent(backgroundGO.transform, false);
+        RectTransform handleRect = handleGO.AddComponent<RectTransform>();
+        handleRect.sizeDelta = handleSize;
+        handleRect.anchoredPosition = new Vector2(-toggleSize.x / 2 + handleSize.x / 2, 0);
+        Image handleImage = handleGO.AddComponent<Image>();
+        handleImage.color = Color.white; // Handle color
+
+        // Add dynamic text under the slider
+        GameObject statusTextGO = new GameObject("StatusText");
+        statusTextGO.transform.SetParent(toggleGO.transform, false);
+        Text statusTextComponent = statusTextGO.AddComponent<Text>();
+        statusTextComponent.text = textOffState; // Set initial text
+        statusTextComponent.font = font;
+        statusTextComponent.fontSize = fontSize;
+        statusTextComponent.alignment = TextAnchor.MiddleCenter;
+        ColorUtility.TryParseHtmlString(textColor, out Color parsedStatusTextColor);
+        statusTextComponent.color = parsedStatusTextColor;
+
+        RectTransform statusTextRect = statusTextGO.GetComponent<RectTransform>();
+        statusTextRect.sizeDelta = new Vector2(toggleSize.x, fontSize + 10);
+        statusTextRect.anchoredPosition = new Vector2(0, -toggleSize.y / 1.5f - 10);
+
+        bool isOn = false; // Whether the bool is on or off
+
+        // When the toggle is clicked, change bool
+        UnityAction toggleAction = () =>
+        {
+            isOn = !isOn; // Swap state
+            float targetX = isOn
+                ? (toggleSize.x / 2 - handleSize.x / 2) // Move completely to the right
+                : (-toggleSize.x / 2 + handleSize.x / 2); // Move completely to the left
+
+            // Changes position of handle and background color
+            handleRect.anchoredPosition = new Vector2(targetX, 0);
+            backgroundImage.color = isOn ? Color.green : Color.red;
+
+            // Change the status text dynamically
+            statusTextComponent.text = isOn ? textOnState : textOffState;
+
+            // Trigger callback
+            onValueChanged?.Invoke(isOn);
+        };
+
+        backgroundButton.onClick.AddListener(toggleAction);
+        handleGO.AddComponent<Button>().onClick.AddListener(toggleAction);
+
+        backgroundImage.color = Color.red;
+    }
+
+
+
+
+
+
     public void CreatePanel(Canvas _canvas,
                             string _rootGameObjectName,
                             string _dialogText,
