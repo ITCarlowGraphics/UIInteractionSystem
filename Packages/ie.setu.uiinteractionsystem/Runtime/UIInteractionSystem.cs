@@ -276,7 +276,7 @@ public class UIInteractionSystem : MonoBehaviour
 
         if (font == null)
         {
-            font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         }
 
         GameObject toggleGO = new GameObject("ToggleContainer");
