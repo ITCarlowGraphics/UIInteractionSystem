@@ -337,6 +337,8 @@ public class UIInteractionSystem : MonoBehaviour
 
         bool isOn = false; // Whether the bool is on or off
 
+        // comment
+
         // When the toggle is clicked, change bool
         UnityAction toggleAction = () =>
         {
