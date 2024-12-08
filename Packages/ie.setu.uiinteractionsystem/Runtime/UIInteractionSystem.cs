@@ -264,27 +264,28 @@ public class UIInteractionSystem : MonoBehaviour
     //-----------------------------------------------------------------------------------------------------------------//
 
     // Creates a toggle button that when clicked on switches its state (bool)
-    public void CreateToggle(Canvas canvas, string rootName, string labelText, Font font, int fontSize,
+    public void CreateToggle(GameObject parentObject, string labelText, Font font, int fontSize,
                              string textColor, string textOnState, string textOffState, Vector2 toggleSize,
                              Vector2 handleSize, Vector2 position, UnityAction<bool> onValueChanged)
     {
-        // Ensure parent exists
-        if (GameObject.Find(rootName) == null)
+        if (parentObject == null)
         {
-            GameObject root = new GameObject(rootName);
-            root.transform.SetParent(canvas.transform, false);
+            Debug.LogError("Parent object is null for creating toggle.");
+            return;
         }
 
-        // Create the toggle container
-        GameObject toggleGO = new GameObject("ToggleContainer");
-        toggleGO.transform.SetParent(GameObject.Find(rootName).transform, false);
+        if (font == null)
+        {
+            font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        }
 
-        // Set RectTransform for the toggle container
+        GameObject toggleGO = new GameObject("ToggleContainer");
+        toggleGO.transform.SetParent(parentObject.transform, false);
+
         RectTransform containerRect = toggleGO.AddComponent<RectTransform>();
         containerRect.sizeDelta = toggleSize;
         containerRect.anchoredPosition = position;
 
-        // Create the label text above the toggle
         GameObject labelGO = new GameObject("Label");
         labelGO.transform.SetParent(toggleGO.transform, false);
         Text labelTextComponent = labelGO.AddComponent<Text>();
@@ -299,7 +300,6 @@ public class UIInteractionSystem : MonoBehaviour
         labelRect.sizeDelta = new Vector2(toggleSize.x, fontSize + 10);
         labelRect.anchoredPosition = new Vector2(0, (toggleSize.y / 1.5f) + 5);
 
-        // Create the toggle background
         GameObject backgroundGO = new GameObject("Background");
         backgroundGO.transform.SetParent(toggleGO.transform, false);
         RectTransform bgRect = backgroundGO.AddComponent<RectTransform>();
@@ -307,24 +307,22 @@ public class UIInteractionSystem : MonoBehaviour
         bgRect.anchoredPosition = Vector2.zero;
 
         Image backgroundImage = backgroundGO.AddComponent<Image>();
-        backgroundImage.color = Color.red; // Initial state (off)
+        backgroundImage.color = Color.red;
 
         Button backgroundButton = backgroundGO.AddComponent<Button>();
 
-        // Create the toggle switch's handle
         GameObject handleGO = new GameObject("Handle");
         handleGO.transform.SetParent(backgroundGO.transform, false);
         RectTransform handleRect = handleGO.AddComponent<RectTransform>();
         handleRect.sizeDelta = handleSize;
         handleRect.anchoredPosition = new Vector2(-toggleSize.x / 2 + handleSize.x / 2, 0);
         Image handleImage = handleGO.AddComponent<Image>();
-        handleImage.color = Color.white; // Handle color
+        handleImage.color = Color.white;
 
-        // Add dynamic text under the slider
         GameObject statusTextGO = new GameObject("StatusText");
         statusTextGO.transform.SetParent(toggleGO.transform, false);
         Text statusTextComponent = statusTextGO.AddComponent<Text>();
-        statusTextComponent.text = textOffState; // Set initial text
+        statusTextComponent.text = textOffState;
         statusTextComponent.font = font;
         statusTextComponent.fontSize = fontSize;
         statusTextComponent.alignment = TextAnchor.MiddleCenter;
@@ -335,27 +333,26 @@ public class UIInteractionSystem : MonoBehaviour
         statusTextRect.sizeDelta = new Vector2(toggleSize.x, fontSize + 10);
         statusTextRect.anchoredPosition = new Vector2(0, -toggleSize.y / 1.5f - 10);
 
-        bool isOn = false; // Whether the bool is on or off
+        bool isOn = false;
 
-        // comment
-
-        // When the toggle is clicked, change bool
         UnityAction toggleAction = () =>
         {
-            isOn = !isOn; // Swap state
-            float targetX = isOn
-                ? (toggleSize.x / 2 - handleSize.x / 2) // Move completely to the right
-                : (-toggleSize.x / 2 + handleSize.x / 2); // Move completely to the left
+            isOn = !isOn;
 
-            // Changes position of handle and background color
-            handleRect.anchoredPosition = new Vector2(targetX, 0);
-            backgroundImage.color = isOn ? Color.green : Color.red;
+            if (isOn)
+            {
+                handleRect.anchoredPosition = new Vector2(toggleSize.x / 2 - handleSize.x / 2, 0);
+                backgroundImage.color = Color.green;
+                statusTextComponent.text = textOnState;
+            }
+            else
+            {
+                handleRect.anchoredPosition = new Vector2(-toggleSize.x / 2 + handleSize.x / 2, 0);
+                backgroundImage.color = Color.red;
+                statusTextComponent.text = textOffState;
+            }
 
-            // Change the status text dynamically
-            statusTextComponent.text = isOn ? textOnState : textOffState;
-
-            // Trigger callback
-            onValueChanged?.Invoke(isOn);
+            onValueChanged.Invoke(isOn);
         };
 
         backgroundButton.onClick.AddListener(toggleAction);
@@ -363,6 +360,8 @@ public class UIInteractionSystem : MonoBehaviour
 
         backgroundImage.color = Color.red;
     }
+
+
 
 
 
