@@ -266,7 +266,9 @@ public class UIInteractionSystem : MonoBehaviour
     // Creates a toggle button that when clicked on switches its state (bool)
     public void CreateToggle(GameObject parentObject, string labelText, Font font, int fontSize,
                              string textColor, string textOnState, string textOffState, Vector2 toggleSize,
-                             Vector2 handleSize, Vector2 position, UnityAction<bool> onValueChanged)
+                             Vector2 handleSize, Vector2 position, UnityAction<bool> onValueChanged,
+                             bool rounded, bool dropShadow, bool sliderBackground, bool greyOut,
+                             Vector2 titlePosition, Vector2 statusTextPosition, Color onColor, Color offColor)
     {
         if (parentObject == null)
         {
@@ -286,6 +288,7 @@ public class UIInteractionSystem : MonoBehaviour
         containerRect.sizeDelta = toggleSize;
         containerRect.anchoredPosition = position;
 
+        // Create Label (toggle title)
         GameObject labelGO = new GameObject("Label");
         labelGO.transform.SetParent(toggleGO.transform, false);
         Text labelTextComponent = labelGO.AddComponent<Text>();
@@ -298,8 +301,9 @@ public class UIInteractionSystem : MonoBehaviour
 
         RectTransform labelRect = labelGO.GetComponent<RectTransform>();
         labelRect.sizeDelta = new Vector2(toggleSize.x, fontSize + 10);
-        labelRect.anchoredPosition = new Vector2(0, (toggleSize.y / 1.5f) + 5);
+        labelRect.anchoredPosition = titlePosition; // Set position for toggle title
 
+        // Create Background
         GameObject backgroundGO = new GameObject("Background");
         backgroundGO.transform.SetParent(toggleGO.transform, false);
         RectTransform bgRect = backgroundGO.AddComponent<RectTransform>();
@@ -307,18 +311,40 @@ public class UIInteractionSystem : MonoBehaviour
         bgRect.anchoredPosition = Vector2.zero;
 
         Image backgroundImage = backgroundGO.AddComponent<Image>();
-        backgroundImage.color = Color.red;
+        backgroundImage.color = greyOut ? Color.gray : offColor;
 
         Button backgroundButton = backgroundGO.AddComponent<Button>();
 
+        if (dropShadow)
+        {
+            Shadow shadow = backgroundGO.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0, 0, 0, 0.8f);
+            shadow.effectDistance = new Vector2(4, -4);
+        }
+
+        // Create Slider Background only if sliderBackground is true
+        if (sliderBackground)
+        {
+            GameObject sliderBG = new GameObject("SliderBackground");
+            sliderBG.transform.SetParent(backgroundGO.transform, false);
+            RectTransform sliderRect = sliderBG.AddComponent<RectTransform>();
+            sliderRect.sizeDelta = new Vector2(toggleSize.x - handleSize.x, handleSize.y * 0.6f); // Bar width minus handle
+            sliderRect.anchoredPosition = Vector2.zero;
+
+            Image sliderImage = sliderBG.AddComponent<Image>();
+            sliderImage.color = Color.gray; // Grey color for the bar
+        }
+
+        // Create Handle
         GameObject handleGO = new GameObject("Handle");
         handleGO.transform.SetParent(backgroundGO.transform, false);
         RectTransform handleRect = handleGO.AddComponent<RectTransform>();
         handleRect.sizeDelta = handleSize;
         handleRect.anchoredPosition = new Vector2(-toggleSize.x / 2 + handleSize.x / 2, 0);
         Image handleImage = handleGO.AddComponent<Image>();
-        handleImage.color = Color.white;
+        handleImage.color = greyOut ? Color.gray : Color.white;
 
+        // Create Status Text (the "ON" or "OFF" text)
         GameObject statusTextGO = new GameObject("StatusText");
         statusTextGO.transform.SetParent(toggleGO.transform, false);
         Text statusTextComponent = statusTextGO.AddComponent<Text>();
@@ -326,12 +352,11 @@ public class UIInteractionSystem : MonoBehaviour
         statusTextComponent.font = font;
         statusTextComponent.fontSize = fontSize;
         statusTextComponent.alignment = TextAnchor.MiddleCenter;
-        ColorUtility.TryParseHtmlString(textColor, out Color parsedStatusTextColor);
-        statusTextComponent.color = parsedStatusTextColor;
+        statusTextComponent.color = parsedTextColor;
 
         RectTransform statusTextRect = statusTextGO.GetComponent<RectTransform>();
         statusTextRect.sizeDelta = new Vector2(toggleSize.x, fontSize + 10);
-        statusTextRect.anchoredPosition = new Vector2(0, -toggleSize.y / 1.5f - 10);
+        statusTextRect.anchoredPosition = statusTextPosition; // Set position for status text
 
         bool isOn = false;
 
@@ -339,32 +364,193 @@ public class UIInteractionSystem : MonoBehaviour
         {
             isOn = !isOn;
 
-            if (isOn)
+            if (greyOut)
             {
-                handleRect.anchoredPosition = new Vector2(toggleSize.x / 2 - handleSize.x / 2, 0);
-                backgroundImage.color = Color.green;
-                statusTextComponent.text = textOnState;
+                if (isOn)
+                {
+                    backgroundImage.color = onColor;
+                    handleImage.color = Color.white;
+                    statusTextComponent.text = textOnState;
+
+                    handleRect.anchoredPosition = new Vector2(toggleSize.x / 2 - handleSize.x / 2, 0);
+                }
+                else
+                {
+                    backgroundImage.color = Color.gray;
+                    handleImage.color = Color.gray;
+                    statusTextComponent.text = textOffState;
+
+                    handleRect.anchoredPosition = new Vector2(-toggleSize.x / 2 + handleSize.x / 2, 0);
+                }
             }
             else
             {
-                handleRect.anchoredPosition = new Vector2(-toggleSize.x / 2 + handleSize.x / 2, 0);
-                backgroundImage.color = Color.red;
-                statusTextComponent.text = textOffState;
+                if (isOn)
+                {
+                    backgroundImage.color = onColor;
+                    handleImage.color = Color.white;
+                    statusTextComponent.text = textOnState;
+
+                    handleRect.anchoredPosition = new Vector2(toggleSize.x / 2 - handleSize.x / 2, 0);
+                }
+                else
+                {
+                    backgroundImage.color = offColor;
+                    handleImage.color = Color.white;
+                    statusTextComponent.text = textOffState;
+
+                    handleRect.anchoredPosition = new Vector2(-toggleSize.x / 2 + handleSize.x / 2, 0);
+                }
             }
 
             onValueChanged.Invoke(isOn);
         };
 
         backgroundButton.onClick.AddListener(toggleAction);
-        handleGO.AddComponent<Button>().onClick.AddListener(toggleAction);
 
-        backgroundImage.color = Color.red;
+        if (greyOut)
+        {
+            backgroundImage.color = Color.gray;
+            handleImage.color = Color.gray;
+            statusTextComponent.text = textOffState;
+        }
+    }
+
+
+    public void AddSliderRWM(GameObject parentPanel, string sliderName, float minValue, float maxValue, float initialValue,
+                             Vector2 sliderSize, Vector2 sliderPosition, string labelText, Vector2 labelPosition,
+                             Sprite fillSprite, Sprite handleSprite, string valueTextFormat = "{0:F1}%", Color labelColor = default)
+    {
+        // Check if UIInteractionSystem instance exists
+        UIInteractionSystem instance = FindObjectOfType<UIInteractionSystem>();
+        if (instance == null)
+        {
+            Debug.Log("UIInteractionSystem instance not found.");
+            return;
+        }
+
+        // Avoid creating duplicate sliders
+        if (parentPanel.transform.Find(sliderName) != null)
+        {
+            return;
+        }
+
+        // Create Volume Slider GameObject
+        GameObject sliderObj = new GameObject(sliderName);
+        sliderObj.transform.SetParent(parentPanel.transform);
+
+        // Add Slider component and set properties
+        Slider slider = sliderObj.AddComponent<Slider>();
+        RectTransform sliderRect = slider.GetComponent<RectTransform>();
+        sliderRect.sizeDelta = sliderSize;
+        sliderRect.localPosition = sliderPosition;
+
+        slider.minValue = minValue;
+        slider.maxValue = maxValue;
+        slider.value = initialValue;
+
+        // Create Fill Area
+        GameObject fillAreaObj = new GameObject("Fill Area");
+        fillAreaObj.transform.SetParent(sliderObj.transform);
+        RectTransform fillAreaRect = fillAreaObj.AddComponent<RectTransform>();
+        fillAreaRect.anchorMin = new Vector2(0, 0.25f);
+        fillAreaRect.anchorMax = new Vector2(1, 0.75f);
+        fillAreaRect.offsetMin = new Vector2(0, 0);
+        fillAreaRect.offsetMax = new Vector2(-30, 0);
+
+        // Add Fill Image
+        GameObject fillObj = new GameObject("Fill");
+        fillObj.transform.SetParent(fillAreaObj.transform);
+        Image fillImage = fillObj.AddComponent<Image>();
+        fillImage.sprite = fillSprite;
+        fillImage.type = Image.Type.Filled;
+        fillImage.fillMethod = Image.FillMethod.Horizontal;
+        RectTransform fillRect = fillObj.GetComponent<RectTransform>();
+        fillRect.anchorMin = Vector2.zero;
+        fillRect.anchorMax = Vector2.one;
+        fillRect.offsetMin = Vector2.zero;
+        fillRect.offsetMax = Vector2.zero;
+
+        slider.fillRect = fillRect;
+
+        // Create Handle
+        GameObject handleObj = new GameObject("Handle");
+        handleObj.transform.SetParent(sliderObj.transform);
+        RectTransform handleRect = handleObj.AddComponent<RectTransform>();
+        handleRect.sizeDelta = new Vector2(60, 35);
+        handleRect.anchorMin = new Vector2(1, 0.5f);
+        handleRect.anchorMax = new Vector2(1, 0.5f);
+        handleRect.pivot = new Vector2(0.5f, 0.5f);
+        handleRect.anchoredPosition = new Vector2(-5, -5);
+
+        Image handleImage = handleObj.AddComponent<Image>();
+        handleImage.sprite = handleSprite;
+        handleImage.color = Color.white;
+
+        slider.handleRect = handleRect;
+
+        // Create Label (slider name)
+        GameObject labelObj = new GameObject(sliderName + "Label");
+        labelObj.transform.SetParent(parentPanel.transform);
+        TextMeshProUGUI labelTextComponent = labelObj.AddComponent<TextMeshProUGUI>();
+        labelTextComponent.text = labelText;
+        labelTextComponent.fontSize = 32;
+        labelTextComponent.color = labelColor == default ? Color.black : labelColor;
+        RectTransform labelRect = labelObj.GetComponent<RectTransform>();
+        labelRect.sizeDelta = new Vector2(200, 50);
+        labelRect.localPosition = labelPosition;
+
+        // Create Value Text
+        GameObject valueTextObj = new GameObject(sliderName + "ValueText");
+        valueTextObj.transform.SetParent(parentPanel.transform);
+        TextMeshProUGUI valueTextComponent = valueTextObj.AddComponent<TextMeshProUGUI>();
+        valueTextComponent.fontSize = 28;
+        valueTextComponent.color = Color.black;
+        valueTextComponent.text = string.Format(valueTextFormat, slider.value);
+        RectTransform valueTextRect = valueTextObj.GetComponent<RectTransform>();
+        valueTextRect.localPosition = new Vector3(labelPosition.x, labelPosition.y - 40, 0);
+
+        // Slider Value Change Listener
+        slider.onValueChanged.AddListener((v) =>
+        {
+            instance.soundVolumeCoefficient = v / 100.0f;
+            valueTextComponent.text = string.Format(valueTextFormat, v);
+        });
     }
 
 
 
+    // Helper Method to Create Circles
+    private GameObject CreateCircle(string name, Transform parent, float radius, Vector2 position, Color color)
+    {
+        Debug.Log("Attempted to make circle");
 
+        GameObject circle = new GameObject(name);
+        circle.transform.SetParent(parent, false);
+        LineRenderer lineRenderer = circle.AddComponent<LineRenderer>();
 
+        lineRenderer.positionCount = 50; // Smoothness
+        lineRenderer.loop = true;
+        lineRenderer.startWidth = 0.1f; // Adjust width as needed
+        lineRenderer.endWidth = 0.1f;
+        lineRenderer.startColor = color;
+        lineRenderer.endColor = color;
+        lineRenderer.useWorldSpace = false;
+
+        Vector3[] points = new Vector3[lineRenderer.positionCount];
+        for (int i = 0; i < lineRenderer.positionCount; i++)
+        {
+            float angle = (float)i / lineRenderer.positionCount * Mathf.PI * 2;
+            points[i] = new Vector3(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius, 0);
+        }
+        lineRenderer.SetPositions(points);
+
+        RectTransform rectTransform = circle.AddComponent<RectTransform>();
+        rectTransform.sizeDelta = new Vector2(radius * 2, radius * 2);
+        rectTransform.anchoredPosition = position;
+
+        return circle;
+    }
 
 
 
