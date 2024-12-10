@@ -417,6 +417,7 @@ public class UIInteractionSystem : MonoBehaviour
     }
 
 
+
     public void AddSliderRWM(GameObject parentPanel, string sliderName, float minValue, float maxValue, float initialValue,
                              Vector2 sliderSize, Vector2 sliderPosition, string labelText, Vector2 labelPosition,
                              Sprite fillSprite, Sprite handleSprite, string valueTextFormat = "{0:F1}%", Color labelColor = default)
